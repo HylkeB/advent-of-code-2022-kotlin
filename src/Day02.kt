@@ -1,6 +1,6 @@
 import java.lang.IllegalArgumentException
 
-sealed class Hand(val pickScore: Int) {
+private sealed class Hand(val pickScore: Int) {
     protected abstract val winsVersus: Hand
     private val losesVersus: Hand get() = winsVersus.winsVersus
     fun winsVersus(other: Hand): Boolean {
@@ -15,9 +15,9 @@ sealed class Hand(val pickScore: Int) {
         return losesVersus
     }
 }
-object Rock : Hand(pickScore = 1) { override val winsVersus = Scissors }
-object Paper : Hand(pickScore = 2) { override val winsVersus = Rock }
-object Scissors : Hand(pickScore = 3) { override val winsVersus = Paper }
+private object Rock : Hand(pickScore = 1) { override val winsVersus = Scissors }
+private object Paper : Hand(pickScore = 2) { override val winsVersus = Rock }
+private object Scissors : Hand(pickScore = 3) { override val winsVersus = Paper }
 
 fun main() {
 

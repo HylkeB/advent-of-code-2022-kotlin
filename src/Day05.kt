@@ -1,13 +1,13 @@
 
-class Stack(val index: Int, val items: ArrayDeque<Char>) {
+private class Stack(val index: Int, val items: ArrayDeque<Char>) {
     override fun toString() = "$index: ${items.reversed()}"
 }
 
-class MoveInstruction(val amount: Int, val fromIndex: Int, val toIndex: Int) {
+private class MoveInstruction(val amount: Int, val fromIndex: Int, val toIndex: Int) {
     override fun toString(): String = "move $amount from $fromIndex to $toIndex"
 }
 
-fun parseData(input: List<String>): Pair<List<Stack>, List<MoveInstruction>> {
+private fun parseData(input: List<String>): Pair<List<Stack>, List<MoveInstruction>> {
     val startingStackData = input.subList(0, input.indexOf("") - 1)
     val amountOfStacks = input[input.indexOf("") - 1].last().digitToInt()
     val stacks = List(amountOfStacks) { index -> Stack(index, ArrayDeque()) }

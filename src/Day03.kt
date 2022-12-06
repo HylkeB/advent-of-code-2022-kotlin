@@ -1,5 +1,4 @@
 import java.lang.IllegalArgumentException
-
 fun main() {
 
     fun calculatePriorityOfItem(item: Char): Int {
