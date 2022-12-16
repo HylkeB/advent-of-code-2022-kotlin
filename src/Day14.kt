@@ -21,36 +21,17 @@ fun main() {
         private fun Int.normalizeX(): Int = width - ((right - this) + 1)
         private fun Int.normalizeY(): Int = top + this
 
-        private fun setGridValue(x: Int, y: Int, value: Char) {
+        fun setGridValue(x: Int, y: Int, value: Char) {
             grid[y.normalizeY()][x.normalizeX()] = value
         }
 
-        private fun getGridValue(x: Int, y: Int): Char? {
+        fun getGridValue(x: Int, y: Int): Char? {
             if (x !in left..right || y !in top..bottom) return null
             return grid[y.normalizeY()][x.normalizeX()]
         }
 
         fun addRock(x: Int, y: Int) {
             setGridValue(x, y, '#')
-        }
-
-        fun simulateSand(): Boolean {
-            tailrec fun simulate(x: Int, y: Int): Boolean {
-                val oneDown = getGridValue(x, y + 1) ?: return false // outside canvas
-                if (oneDown == '.') return simulate(x, y + 1)
-
-                val downLeft = getGridValue(x - 1, y + 1) ?: return false // outside canvas
-                if (downLeft == '.') return simulate(x - 1, y + 1)
-
-                val downRight = getGridValue(x + 1, y + 1) ?: return false // outside canvas
-                if (downRight == '.') return simulate(x + 1, y + 1)
-
-                setGridValue(x, y, 'O')
-                return true
-
-            }
-
-            return simulate(0, 0)
         }
 
         fun debugDraw() {
@@ -122,23 +103,71 @@ fun main() {
 
     fun part1(input: List<String>): Int {
         val scan = input.parseInput()
+
+        tailrec fun Scan.simulate(x: Int, y: Int): Boolean {
+            val oneDown = getGridValue(x, y + 1) ?: return false // outside canvas
+            if (oneDown == '.') return simulate(x, y + 1)
+
+            val downLeft = getGridValue(x - 1, y + 1) ?: return false // outside canvas
+            if (downLeft == '.') return simulate(x - 1, y + 1)
+
+            val downRight = getGridValue(x + 1, y + 1) ?: return false // outside canvas
+            if (downRight == '.') return simulate(x + 1, y + 1)
+
+            setGridValue(x, y, 'O')
+            return true
+        }
+
         var counter = 0
-        while (scan.simulateSand()) {
+        while (scan.simulate(0, 0)) {
             counter++
         }
         return counter
     }
 
     fun part2(input: List<String>): Int {
-        return 0
+        val maxY = input.map { line ->
+            line.split(" -> ")
+                    .map {
+                        val splitted = it.split(",")
+                        splitted[0].toInt() to splitted[1].toInt()
+                    }
+                    .map { (x, y) -> x - 500 to y } // normalize
+        }.flatten().maxBy { (x, y) -> y }.second + 2
+        val scan = (input + "-10000,$maxY -> 10000,$maxY").parseInput()
+        tailrec fun Scan.simulate(x: Int, y: Int) {
+            val oneDown = getGridValue(x, y + 1)
+                    ?: throw IllegalStateException("Outside canvas, bottom line not wide enough")
+            if (oneDown == '.') return simulate(x, y + 1)
+
+            val downLeft = getGridValue(x - 1, y + 1)
+                    ?: throw IllegalStateException("Outside canvas, bottom line not wide enough")
+            if (downLeft == '.') return simulate(x - 1, y + 1)
+
+            val downRight = getGridValue(x + 1, y + 1)
+                    ?: throw IllegalStateException("Outside canvas, bottom line not wide enough")
+            if (downRight == '.') return simulate(x + 1, y + 1)
+
+            setGridValue(x, y, 'O')
+        }
+
+        var counter = 0
+        do {
+            scan.simulate(0, 0)
+            counter++
+        } while (scan.getGridValue(0, 0) == '+')
+        return counter
     }
 
     // test if implementation meets criteria from the description, like:
     val dayNumber = 14
     val testInput = readInput("Day${dayNumber}_test")
     val testResultPart1 = part1(testInput)
-    check(testResultPart1 == 24) { "was $testResultPart1" }
-//    check(part2(testInput) == 12345)
+    val testAnswerPart1 = 24
+    check(testResultPart1 == testAnswerPart1) { "Part 1: got $testResultPart1 but expected $testAnswerPart1" }
+    val testResultPart2 = part2(testInput)
+    val testAnswerPart2 = 93
+    check(testResultPart2 == testAnswerPart2) { "Part 2: got $testResultPart2 but expected $testAnswerPart2" }
 
     val input = readInput("Day$dayNumber")
     println(part1(input))
